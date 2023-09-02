@@ -1,10 +1,8 @@
 package models
 
-import(
-	"github.com/SagHuns/todo-project/db"
-)
+import "github.com/SagHuns/todo-project/db"
 
-func Insert(todo Todo) (id int64, err error) {
+func Get(id int64) (todo Todo, err error) {
 	// Primeiro passo é tentar abrir uma conexão com o banco de dados
 	conn, err := db.OpenConnection()
 	if err != nil {
@@ -14,9 +12,9 @@ func Insert(todo Todo) (id int64, err error) {
 	// Fecha o DB qunado a operação encerrar
 	defer conn.Close()
 
-	sql := `INSERT INTO todos (title, description, done) VALUES($1, $2, $3) RETURNING id`
+	row := conn.QueryRow(`SELECT * FROM todos WHERE id=$1`, id)
 
-	err = conn.QueryRow(sql, todo.Title, todo.Description, todo.Done).Scan(&id)
+	err = row.Scan(&todo.ID, &todo.Title, &todo.Description, &todo.Done)
 
 	return
 }
